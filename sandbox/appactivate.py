@@ -8,5 +8,5 @@ hwnd = win32gui.GetForegroundWindow()
 pid = win32process.GetWindowThreadProcessId(hwnd)
 #a = shell.AppActivate(pid[1])
 a = shell.AppActivate(4520)
-print pid
-print a
+print(pid)
+print(a)

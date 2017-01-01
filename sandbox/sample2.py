@@ -15,12 +15,12 @@ def getAllChildWindow(hwnd, param):
     c_window_list.append({"name":c_window_name,"hwnd":hwnd})
 
 def activate_app(hwnd):
-    #print window["name"]
+    #print(window["name"])
     if IsIconic(hwnd):
-        print "最小化されていたので,リストアしました"
+        print("最小化されていたので,リストアしました")
         ShowWindow(hwnd,SW_RESTORE)
     else:
-        print "最小化されていなかったので、SetForegroundWindowを使いました。"
+        print("最小化されていなかったので、SetForegroundWindowを使いました。")
         result = SetForegroundWindow(hwnd)
 
 EnumWindows(getAllwindowAslist, None)

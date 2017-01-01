@@ -1,11 +1,12 @@
 # coding: utf-8
-from win32gui import *
-from win32con import * #SW_SHOWNORMALを呼ぶため
-from win32process import *
+import win32gui
+import win32con #SW_SHOWNORMALを呼ぶため
+import win32process
 
 import win32com.client
 import subprocess
-import thread
+import _thread as thread
+import sys
 
 shell = win32com.client.Dispatch("Wscript.Shell")
 
@@ -25,51 +26,51 @@ class Window():# {{{
         global window_list
         window_list = [] #初期化
         try:
-            EnumChildWindows(None, getWindows, None) #window_listの生成 第1引数がNoneなのでデスクトップレベルのwindow全て列挙｡たまにエラーを起こす｡
+            win32gui.EnumChildWindows(None, getWindows, None) #window_listの生成 第1引数がNoneなのでデスクトップレベルのwindow全て列挙｡たまにエラーを起こす｡
         except:
-            pass
+            print(sys.exc_info()[0])
         for window in window_list:
             if (class_title == None or window["class"] == class_title) and (window_title == None or window_title in window["title"]):
                 self.hit_count += 1
                 self.prop["hwnd"] = window["hwnd"]
                 self.prop["title"] = window["title"]
                 self.prop["class"] = window["class"]
-                self.prop["thread_id"] = GetWindowThreadProcessId(self.prop["hwnd"])[0]# }}}
+                self.prop["thread_id"] = win32process.GetWindowThreadProcessId(self.prop["hwnd"])[0]# }}}
 
     def become_child(self, class_title, window_title):# {{{
         if self.hit_count != 0:
             global window_list
             window_list = [] #初期化
-            EnumChildWindows(self.prop["hwnd"], getWindows, None) #window_listの生成
+            win32gui.EnumChildWindows(self.prop["hwnd"], getWindows, None) #window_listの生成
             for window in window_list:
                 if (class_title == None or window["class"] == class_title) and (window_title == None or window_title in window["title"]):
                     self.hit_count += 1
                     self.prop["hwnd"] = window["hwnd"]
                     self.prop["title"] = window["title"]
                     self.prop["class"] = window["class"]
-                    self.prop["thread_id"] = GetWindowThreadProcessId(self.prop["hwnd"])[0]
+                    self.prop["thread_id"] = win32process.GetWindowThreadProcessId(self.prop["hwnd"])[0]
         else:
             return# }}}
 
     def activate_app(self):# {{{
         if self.hit_count == 0:
-            print "The specified condition doesn't match any windows…"
+            print("The specified condition doesn't match any windows…")
             #subprocess.call(self.application)
             #最大化がの方法がsubprocess.callではわからなかったため。
             shell.run(self.application, 3)
             self.__init__(self.searching_class_title, self.searching_window_title, self.searching_application)
             return
-        elif IsIconic(self.prop["hwnd"]):
-            print "最小化されていたので,リストアしました"
+        elif win32gui.IsIconic(self.prop["hwnd"]):
+            print("最小化されていたので,リストアしました")
             ShowWindow(self.prop["hwnd"],SW_RESTORE)
         else:
-            print "最小化されていなかったので、SetForegroundWindowを使いました。"
-            forground_thread_id = GetWindowThreadProcessId(GetForegroundWindow())[0]
-            AttachThreadInput(forground_thread_id, thread.get_ident(), True)
-            SetWindowPos(self.prop["hwnd"],HWND_TOPMOST,0,0,0,0,SWP_NOMOVE | SWP_NOSIZE);
-            SetWindowPos(self.prop["hwnd"],HWND_NOTOPMOST,0,0,0,0,SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+            print("最小化されていなかったので、SetForegroundWindowを使いました。")
+            forground_thread_id = win32process.GetWindowThreadProcessId(win32gui.GetForegroundWindow())[0]
+            win32process.AttachThreadInput(forground_thread_id, thread.get_ident(), True)
+            win32gui.SetWindowPos(self.prop["hwnd"],win32con.HWND_TOPMOST,0,0,0,0,win32con.SWP_NOMOVE | win32con.SWP_NOSIZE);
+            win32gui.SetWindowPos(self.prop["hwnd"],win32con.HWND_NOTOPMOST,0,0,0,0,win32con.SWP_SHOWWINDOW | win32con.SWP_NOMOVE | win32con.SWP_NOSIZE);
             result = SetForegroundWindow(self.prop["hwnd"])
-            AttachThreadInput(forground_thread_id, thread.get_ident(), False)
+            win32process.AttachThreadInput(forground_thread_id, thread.get_ident(), False)
             # }}}
 
     #うまく作動しない。# {{{
@@ -79,7 +80,7 @@ class Window():# {{{
     def debug(self):# {{{
         print("The number of hits is " + str(self.hit_count))
         if self.hit_count == 0:
-            print "The specified condition doesn't match any windows…"
+            print("The specified condition doesn't match any windows…")
         else:
             print("class is " + self.prop["class"])
             print("title is " + self.prop["title"])
@@ -95,7 +96,7 @@ class Window():# {{{
 
 #---------------------sub procedure----------------------------------------------------
 def getWindows(hwnd, lParam):# {{{
-    window_name = GetWindowText(hwnd).decode("shift-jis").encode("utf8")
-    window_class = GetClassName(hwnd).decode("shift-jis").encode("utf8")
+    window_name = win32gui.GetWindowText(hwnd)
+    window_class = win32gui.GetClassName(hwnd)
     window_list.append({"title":window_name,"hwnd":hwnd, "class":window_class})# }}}
 

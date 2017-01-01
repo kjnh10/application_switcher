@@ -47,23 +47,23 @@ class Window():
 
     def activate_app(self):
         if self.hit_count == 0:
-            print "The specified condition doesn't match any windows…"
+            print("The specified condition doesn't match any windows…")
             #subprocess.call(self.application)
             #最大化がの方法がsubprocess.callではわからなかったため。
             shell.run(self.application, 3)
             self.__init__(self.searching_class_title, self.searching_window_title, self.searching_application)
             return
         elif IsIconic(self.prop["hwnd"]):
-            print "最小化されていたので,リストアしました"
+            print("最小化されていたので,リストアしました")
             ShowWindow(self.prop["hwnd"],SW_RESTORE)
         else:
-            print "最小化されていなかったので、SetForegroundWindowを使いました。"
+            print("最小化されていなかったので、SetForegroundWindowを使いました。")
             result = SetForegroundWindow(self.prop["hwnd"])
 
     def debug(self):
         print("The number of hits is " + str(self.hit_count))
         if self.hit_count == 0:
-            print "The specified condition doesn't match any windows…"
+            print("The specified condition doesn't match any windows…")
         else:
             print("class is " + self.prop["class"])
             print("title is " + self.prop["title"])
@@ -89,8 +89,8 @@ def getWindows(hwnd, lParam):
 
 def activate_app(hwnd):
     if IsIconic(hwnd):
-        print "最小化されていたので,リストアしました"
+        print("最小化されていたので,リストアしました")
         ShowWindow(hwnd,SW_RESTORE)
     else:
-        print "最小化されていなかったので、SetForegroundWindowを使いました。"
+        print("最小化されていなかったので、SetForegroundWindowを使いました。")
         result = SetForegroundWindow(hwnd)
